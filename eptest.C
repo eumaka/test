@@ -275,8 +275,8 @@ void EpFinderReco::GetEventPlanes(PHCompositeNode *topNode)
      TowerInfo *_tower = _towerinfos->get_tower_at_channel(ch);
      unsigned int key =_towerinfos->encode_key(ch);
      RawTowerDefs::CalorimeterId calo_id = RawTowerDefs::convert_name_to_caloid(detector);
-     int ieta = _towerinfos->getTowerEtaBin(towerkey);
-     int iphi = _towerinfos->getTowerPhiBin(towerkey);
+     int ieta = _towerinfos->getTowerEtaBin(key);
+     int iphi = _towerinfos->getTowerPhiBin(key);
      RawTowerDefs::keytype towerid = RawTowerDefs::encode_towerid(calo_id, ieta, iphi);
      RawTowerGeom *_tgeo = _towergeom->get_tower_geometry(towerid);
      
