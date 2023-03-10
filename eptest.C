@@ -88,19 +88,19 @@ int EpFinderReco::CreateNodes(PHCompositeNode *topNode)
     dstNode->addNode(AlgoNode);
   }
 
-  epnode = "EpInfo_" + detector;
+  EpNode = "EpInfo_" + detector;
   if((detector == "EPD") || (detector == "BBC"))
   {
-    epnode += "_North";
-    EventPlaneNodeName.push_back(epnode);
-    epnode = "EpInfo_" + detector;
-    epnode += "_South";
-    EventPlaneNodeName.push_back(epnode);
+    EpNode += "_North";
+    EventPlaneNodeName.push_back(EpNode);
+    EpNode = "EpInfo_" + detector;
+    EpNode += "_South";
+    EventPlaneNodeName.push_back(EpNode);
   }
   else
   {
-    epnode = "EpInfo_" + detector;
-    EventPlaneNodeName.push_back(epnode);
+    EpNode = "EpInfo_" + detector;
+    EventPlaneNodeName.push_back(EpNode);
   }
     
  for (unsigned int i = 0; i < EventPlaneNodeName.size(); i++)
@@ -245,16 +245,16 @@ void EpFinderReco::GetEventPlanes(PHCompositeNode *topNode)
 int EpFinderReco::GetNodes(PHCompositeNode *topNode)
 {
  
-   for (unsigned int i = 0; i < EventPlaneNodeName.size(); ++i)
-   {
+  for (unsigned int i = 0; i < EventPlaneNodeName.size(); ++i)
+  {
             
     _EpInfo_det[i] = findNode::getClass<EpInfo>(topNode, EventPlaneNodeName[i]);
 
-     if (!_EpInfo_det[i])
-     {
+    if (!_EpInfo_det[i])
+    {
       std::cout << PHWHERE << ": Could not find node:"<< EventPlaneNodeName[i] << std::endl;
-          return Fun4AllReturnCodes::ABORTEVENT;
-     }
+      return Fun4AllReturnCodes::ABORTEVENT;
+    }
   }
 
   return Fun4AllReturnCodes::EVENT_OK;
