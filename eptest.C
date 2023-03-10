@@ -147,7 +147,7 @@ void EpFinderReco::GetEventPlanes(PHCompositeNode *topNode)
  std::cout << "--------------------------------------------------------------------------------" << std::endl;
  std::cout << "Welcome to Event Plane Module " << std::endl;
  std::cout << "All you need is to choose a detector " << std::endl;
- std::cout << "From the list: EPD, CEMC, HCALOUT, HCALIN, BBC" << std::endl;
+ std::cout << "From the list: EPD, CEMC, HCALOUT, HCALIN" << std::endl;
  std::cout << "The output are the Q vectors and event plane angles up to the default 3rd order" << std::endl;
 
  if(detector == "EPD")
