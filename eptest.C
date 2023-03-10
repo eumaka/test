@@ -88,7 +88,7 @@ int EpFinderReco::CreateNodes(PHCompositeNode *topNode)
     dstNode->addNode(AlgoNode);
   }
 
-  EpNode = "EpInfo_" + detector;
+  EpNode += detector;
   if((detector == "EPD") || (detector == "BBC"))
   {
     EpNode += "_North";
