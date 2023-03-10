@@ -53,7 +53,7 @@ class EpFinderReco : public SubsysReco
 
   std::vector<std::string> EventPlaneNodeName;
   std::string EpNode;
-  std::string TowerNode;
+  std::string TowerNode = TOWERINFO_CALIB_;
 
 };
 
