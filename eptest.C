@@ -280,10 +280,14 @@ void EpFinderReco::GetEventPlanes(PHCompositeNode *topNode)
      RawTowerDefs::keytype towerid = RawTowerDefs::encode_towerid(calo_id, ieta, iphi);
      RawTowerGeom *_tgeo = _towergeom->get_tower_geometry(towerid);
      
-     EpHit newHit;
-     newHit.nMip = _tower->get_energy();
-     newHit.phi = _tgeo->get_phi();
-     calohit.push_back(newHit);
+     if(_tgeo)
+     {
+       EpHit newHit;
+       newHit.nMip = _tower->get_energy();
+       newHit.phi = _tgeo->get_phi();
+       calohit.push_back(newHit);
+     }
+  
    }
 
    EpFinder_det[0]->Results(calohit, 0, _EpInfo_det[0]);
