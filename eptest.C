@@ -163,6 +163,7 @@ void EpFinderReco::GetEventPlanes(PHCompositeNode *topNode)
    }
 
    int cent_index = cent->get_centile(CentralityInfo::PROP::bimp)/10;
+   TowerNode += detector;
      
    TowerInfoContainerv1 *_epd_towerinfos_calib = findNode::getClass<TowerInfoContainerv1>(topNode, "TOWERINFO_CALIB_EPD");
    if (!_epd_towerinfos_calib)
