@@ -89,7 +89,7 @@ int EpFinderReco::CreateNodes(PHCompositeNode *topNode)
   }
 
   epnode = "EpInfo_" + detector;
-  if( (detector == "EPD") || (detector == "BBC") )
+  if((detector == "EPD") || (detector == "BBC"))
   {
     epnode += "_North";
     EventPlaneNodeName.push_back(epnode);
@@ -194,49 +194,48 @@ void EpFinderReco::GetEventPlanes(PHCompositeNode *topNode)
    for (unsigned int ch = 0; ch < ntowers;  ch++)
    {
 
-      TowerInfo *raw_tower = _epd_towerinfos_calib->get_tower_at_channel(ch);
-      unsigned int thiskey =_epd_towerinfos_calib->encode_epd(ch);
+     TowerInfo *raw_tower = _epd_towerinfos_calib->get_tower_at_channel(ch);
+     unsigned int thiskey =_epd_towerinfos_calib->encode_epd(ch);
 
-       tile_phi = epdtilegeom->phi(thiskey);
-       tile_index = epdtilegeom->id_to_side_sector_tile(thiskey);
-       arm_id = get<0>(tile_index);
-       tile_id = get<2>(tile_index);
-       tile_ring = EPDDefs::get_ring(tile_id);
+     tile_phi = epdtilegeom->phi(thiskey);
+     tile_index = epdtilegeom->id_to_side_sector_tile(thiskey);
+     arm_id = get<0>(tile_index);
+     tile_id = get<2>(tile_index);
+     tile_ring = EPDDefs::get_ring(tile_id);
 
-       tile_e = raw_tower->get_energy();
-       eMax = EPDDefs::get_eMax(cent_index, tile_ring);
+     tile_e = raw_tower->get_energy();
+     eMax = EPDDefs::get_eMax(cent_index, tile_ring);
         
-       if(tile_e < 0.2) continue;
-       float truncated_tile_e = (tile_e < eMax) ? tile_e : eMax;
+     if(tile_e < 0.2) continue;
+     float truncated_tile_e = (tile_e < eMax) ? tile_e : eMax;
 
-       if(arm_id == 0) //south wheel
+     if(arm_id == 0) //south wheel
      {
-            EpHit newHit;
-            newHit.nMip = truncated_tile_e;
-            newHit.phi = tile_phi;
-            tnehits.push_back(newHit);
+       EpHit newHit;
+       newHit.nMip = truncated_tile_e;
+       newHit.phi = tile_phi;
+       tnehits.push_back(newHit);
      }
-
      else if(arm_id == 1) //north wheel
-         {
-           EpHit newHit;
-           newHit.nMip = truncated_tile_e;
-           newHit.phi = tile_phi;
-           tsehits.push_back(newHit);
-          }
+     {
+       EpHit newHit;
+       newHit.nMip = truncated_tile_e;
+       newHit.phi = tile_phi;
+       tsehits.push_back(newHit);
+     }
           
-      }//end loop over sepd tower info
+   }//end loop over sepd tower info
     
  
-     EpFinder_det[0]->Results(tsehits, 0, _EpInfo_det[0]);
-     EpFinder_det[1]->Results(tnehits, 0, _EpInfo_det[1]);
+   EpFinder_det[0]->Results(tsehits, 0, _EpInfo_det[0]);
+   EpFinder_det[1]->Results(tnehits, 0, _EpInfo_det[1]);
     
-     tsehits.clear();
-     tnehits.clear();
-   }
-   else if(detector == "CEMC")
+   tsehits.clear();
+   tnehits.clear();
+  }
+  else if((detector == "CEMC") || (detector == "HCALOUT") || (detector == "HCALIN"))
    {
-     std::cout<<"calculating event plane angles for detector "<< detector<< std::endl;
+     std::cout<< "calculating event plane angles for detector " << detector << std::endl;
     
    }
   
