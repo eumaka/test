@@ -17,6 +17,11 @@
 #include <calobase/TowerInfo.h>
 #include <calobase/TowerInfov1.h>
 
+#include <calobase/RawTower.h>
+#include <calobase/RawTowerContainer.h>
+#include <calobase/RawTowerDefs.h>
+#include <calobase/RawTowerGeom.h>
+#include <calobase/RawTowerGeomContainer.h>
 
 #include <fun4all/Fun4AllReturnCodes.h>
 #include <fun4all/SubsysReco.h>  // for SubsysReco
@@ -154,7 +159,9 @@ void EpFinderReco::GetEventPlanes(PHCompositeNode *topNode)
  {
  
    std::cout<< "calculating event plane angles for detector " << detector << std::endl;
-    
+   TowerNode += detector;
+   TowerGeomNode += detector;
+
    CentralityInfov1 *cent = findNode::getClass<CentralityInfov1>(topNode, "CentralityInfo");
    if (!cent)
    {
@@ -163,19 +170,18 @@ void EpFinderReco::GetEventPlanes(PHCompositeNode *topNode)
    }
 
    int cent_index = cent->get_centile(CentralityInfo::PROP::bimp)/10;
-   TowerNode += detector;
      
-   TowerInfoContainerv1 *_epd_towerinfos_calib = findNode::getClass<TowerInfoContainerv1>(topNode, "TOWERINFO_CALIB_EPD");
-   if (!_epd_towerinfos_calib)
+   TowerInfoContainerv1 *_towerinfos = findNode::getClass<TowerInfoContainerv1>(topNode, TowerNode);
+   if (!_towerinfos)
    {
-      std::cout << "Could not locate SEPD CALIB tower info node " << std::endl;
+      std::cout << "Could not locate tower info node " << TowerNode << std::endl;
       exit(1);
    }
 
-   EpdGeom *epdtilegeom = findNode::getClass<EpdGeom>(topNode,"TOWERGEOM_EPD");
-   if (!epdtilegeom)
+   EpdGeom *_epdgeom = findNode::getClass<EpdGeom>(topNode,TowerGeomNode);
+   if (!_epdgeom)
    {
-      std::cout << "Could not locate SEPD geometry node " << std::endl;
+      std::cout << "Could not locate geometry node " << TowerGeomNode << std::endl;
       exit(1);
    }
 
@@ -191,15 +197,15 @@ void EpFinderReco::GetEventPlanes(PHCompositeNode *topNode)
    int tile_id = -1; int tile_ring = -1; float eMax = 0.;
    std::tuple<unsigned int, unsigned int, unsigned int > tile_index;
 
-   unsigned int ntowers = _epd_towerinfos_calib->size();
+   unsigned int ntowers = _towerinfos->size();
    for (unsigned int ch = 0; ch < ntowers;  ch++)
    {
 
-     TowerInfo *raw_tower = _epd_towerinfos_calib->get_tower_at_channel(ch);
-     unsigned int thiskey =_epd_towerinfos_calib->encode_epd(ch);
+     TowerInfo *raw_tower = _towerinfos->get_tower_at_channel(ch);
+     unsigned int thiskey =_towerinfos->encode_epd(ch);
 
-     tile_phi = epdtilegeom->phi(thiskey);
-     tile_index = epdtilegeom->id_to_side_sector_tile(thiskey);
+     tile_phi = _epdgeom->phi(thiskey);
+     tile_index = _epdgeom->id_to_side_sector_tile(thiskey);
      arm_id = get<0>(tile_index);
      tile_id = get<2>(tile_index);
      tile_ring = EPDDefs::get_ring(tile_id);
@@ -233,10 +239,54 @@ void EpFinderReco::GetEventPlanes(PHCompositeNode *topNode)
     
    tsehits.clear();
    tnehits.clear();
+   
   }
   else if((detector == "CEMC") || (detector == "HCALOUT") || (detector == "HCALIN"))
+  {
+    
+   std::cout<< "calculating event plane angles for detector " << detector << std::endl;
+   TowerNode += detector;
+   TowerGeomNode += detector;
+    
+   TowerInfoContainerv1 *_towerinfos = findNode::getClass<TowerInfoContainerv1>(topNode, TowerNode);
+   if (!_towerinfos)
    {
-     std::cout<< "calculating event plane angles for detector " << detector << std::endl;
+     std::cout << "Could not locate tower info node " << TowerNode << std::endl;
+     exit(1);
+   }
+
+   RawTowerGeomContainer *_towergeom = findNode::getClass<RawTowerGeomContainer>(topNode, TowerGeomNode);
+   if (!_towergeom)
+   {
+      std::cout << "Could not locate geometry node " << TowerGeomNode << std::endl;
+      exit(1);
+   }
+ 
+    
+     std::vector<EpHit> hits;
+     hits.clear();
+    
+    
+    
+
+    RawTowerContainer::ConstRange begin_end = _calib_towers->getTowers();
+    RawTowerContainer::ConstIterator itr = begin_end.first;
+    for (; itr != begin_end.second; ++itr)
+    {
+      RawTowerDefs::keytype towerid = itr->first;
+      RawTower *rawtower = _calib_towers->getTower(towerid);
+      if (rawtower)
+      {
+        EpHit newHit;
+        RawTowerGeom *tgeo = rawtowergeom->get_tower_geometry(towerid);
+        newHit.nMip = rawtower->get_energy();
+        newHit.phi = tgeo->get_phi();
+        hits.push_back(newHit);
+      }
+    }
+
+    EpFinder_1->Results(hits, 0, _CALO_EpInfo);
+    hits.clear()
     
    }
   
