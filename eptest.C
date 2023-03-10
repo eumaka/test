@@ -186,11 +186,11 @@ void EpFinderReco::GetEventPlanes(PHCompositeNode *topNode)
    }
 
 
-   std::vector<EpHit> tnehits;
-   tnehits.clear();
+   std::vector<EpHit> epdhitnorth;
+   epdhitnorth.clear();
 
-   std::vector<EpHit> tsehits;
-   tsehits.clear();
+   std::vector<EpHit> epdhitsouth;
+   epdhitsouth.clear();
       
 
    float tile_phi = 0.; float tile_e = 0.; int arm_id = -1;
@@ -201,7 +201,7 @@ void EpFinderReco::GetEventPlanes(PHCompositeNode *topNode)
    for (unsigned int ch = 0; ch < ntowers;  ch++)
    {
 
-     TowerInfo *raw_tower = _towerinfos->get_tower_at_channel(ch);
+     TowerInfo *_tower = _towerinfos->get_tower_at_channel(ch);
      unsigned int thiskey =_towerinfos->encode_epd(ch);
 
      tile_phi = _epdgeom->phi(thiskey);
@@ -210,7 +210,7 @@ void EpFinderReco::GetEventPlanes(PHCompositeNode *topNode)
      tile_id = get<2>(tile_index);
      tile_ring = EPDDefs::get_ring(tile_id);
 
-     tile_e = raw_tower->get_energy();
+     tile_e = _tower->get_energy();
      eMax = EPDDefs::get_eMax(cent_index, tile_ring);
         
      if(tile_e < 0.2) continue;
@@ -221,26 +221,27 @@ void EpFinderReco::GetEventPlanes(PHCompositeNode *topNode)
        EpHit newHit;
        newHit.nMip = truncated_tile_e;
        newHit.phi = tile_phi;
-       tnehits.push_back(newHit);
+       epdhitsouth.push_back(newHit);
      }
      else if(arm_id == 1) //north wheel
      {
        EpHit newHit;
        newHit.nMip = truncated_tile_e;
        newHit.phi = tile_phi;
-       tsehits.push_back(newHit);
+       epdhitnorth.push_back(newHit);
      }
           
    }//end loop over sepd tower info
     
  
-   EpFinder_det[0]->Results(tsehits, 0, _EpInfo_det[0]);
-   EpFinder_det[1]->Results(tnehits, 0, _EpInfo_det[1]);
+   EpFinder_det[0]->Results(epdhitsouth, 0, _EpInfo_det[0]);
+   EpFinder_det[1]->Results(epdhitnorth, 0, _EpInfo_det[1]);
     
-   tsehits.clear();
-   tnehits.clear();
+   epdhitsouth.clear();
+   epdhitnorth.clear();
    
   }
+  
   else if((detector == "CEMC") || (detector == "HCALOUT") || (detector == "HCALIN"))
   {
     
@@ -263,30 +264,30 @@ void EpFinderReco::GetEventPlanes(PHCompositeNode *topNode)
    }
  
     
-     std::vector<EpHit> hits;
-     hits.clear();
+   std::vector<EpHit> calohit;
+   calohit.clear();
     
-    
-    
+   float tower_e = 0.; float tower_phi = 0.;
+   unsigned int ntowers = _towerinfos->size();
+   for (unsigned int ch = 0; ch < ntowers;  ch++)
+   {
 
-    RawTowerContainer::ConstRange begin_end = _calib_towers->getTowers();
-    RawTowerContainer::ConstIterator itr = begin_end.first;
-    for (; itr != begin_end.second; ++itr)
-    {
-      RawTowerDefs::keytype towerid = itr->first;
-      RawTower *rawtower = _calib_towers->getTower(towerid);
-      if (rawtower)
-      {
-        EpHit newHit;
-        RawTowerGeom *tgeo = rawtowergeom->get_tower_geometry(towerid);
-        newHit.nMip = rawtower->get_energy();
-        newHit.phi = tgeo->get_phi();
-        hits.push_back(newHit);
-      }
-    }
+     TowerInfo *_tower = _towerinfos->get_tower_at_channel(ch);
+     unsigned int key =_towerinfos->encode_key(ch);
+     RawTowerDefs::CalorimeterId calo_id = RawTowerDefs::convert_name_to_caloid(detector);
+     int ieta = _towerinfos->getTowerEtaBin(towerkey);
+	   int iphi = _towerinfos->getTowerPhiBin(towerkey);
+     RawTowerDefs::keytype towerid = RawTowerDefs::encode_towerid(calo_id, ieta, iphi);
+     RawTowerGeom *_tgeo = _towergeom->get_tower_geometry(towerid);
+     
+     EpHit newHit;
+     newHit.nMip = _tower->get_energy();
+     newHit.phi = _tgeo->get_phi();
+     calohit.push_back(newHit);
+   }
 
-    EpFinder_1->Results(hits, 0, _CALO_EpInfo);
-    hits.clear()
+   EpFinder_det[0]->Results(calohit, 0, _EpInfo_det[0]);
+   calohit.clear()
     
    }
   
