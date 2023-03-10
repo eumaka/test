@@ -91,15 +91,15 @@ int EpFinderReco::CreateNodes(PHCompositeNode *topNode)
   EpNode += detector;
   if((detector == "EPD") || (detector == "BBC"))
   {
-    EpNode += "_North";
+    EpNode += "_SOUTH";
     EventPlaneNodeName.push_back(EpNode);
-    EpNode = "EpInfo_" + detector;
-    EpNode += "_South";
+    EpNode = "EPINFO_" + detector;
+    EpNode += "_NORTH";
     EventPlaneNodeName.push_back(EpNode);
   }
   else
   {
-    EpNode = "EpInfo_" + detector;
+    EpNode = "EPINFO_" + detector;
     EventPlaneNodeName.push_back(EpNode);
   }
     
