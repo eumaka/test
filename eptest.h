@@ -52,8 +52,8 @@ class EpFinderReco : public SubsysReco
   EpInfo *_EpInfo_det[2] = {};
 
   std::vector<std::string> EventPlaneNodeName;
-  std::string EpNode;
-  std::string TowerNode = TOWERINFO_CALIB_;
+  std::string EpNode = "EPINFO_";
+  std::string TowerNode = "TOWERINFO_CALIB_";
 
 };
 
