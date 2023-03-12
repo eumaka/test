@@ -233,7 +233,7 @@ void EpFinderReco::GetEventPlanes(PHCompositeNode *topNode)
        epdhitnorth.push_back(newHit);
      }
           
-   }//end loop over sepd tower info
+   }
     
  
    EpFinder_det[0]->Results(epdhitsouth, 0, _EpInfo_det[0]);
@@ -337,8 +337,55 @@ void EpFinderReco::GetEventPlanes(PHCompositeNode *topNode)
   else if (detector == "BBC")
   {
   
-  
-  
+    PHG4HitContainer* b_hit_container = findNode::getClass<PHG4HitContainer>(topNode, "G4HIT_" + detector);
+    if (!b_hit_container)
+    {
+     std::cout << "Could not locate node G4HIT_" << detector << std::endl;
+     exit(1);
+    }
+       
+    std::vector<EpHit> nbhits;
+    nbhits.clear();
+
+    std::vector<EpHit> sbhits;
+    sbhits.clear();
+
+    PHG4HitContainer::ConstRange b_range = b_hit_container->getHits();
+    for (PHG4HitContainer::ConstIterator b_itr = b_range.first; b_itr != b_range.second; b_itr++)
+    {
+      PHG4Hit *bhit = b_itr->second;
+      if (!bhit)
+      {
+        continue;
+      }
+
+      if (bhit->get_edep() < 0.0) continue;
+      if ((b_itr->second->get_t(0) > -50) && (b_itr->second->get_t(1) < 50))
+      {
+        TVector3 bhitPos(bhit->get_avg_x(), bhit->get_avg_y(), bhit->get_avg_z());
+        int id = bhit->get_layer();
+        if ((id & 0x40) == 0)
+        {
+          EpHit newHit;
+          newHit.nMip = bhit->get_edep();
+          newHit.phi = bhitPos.Phi();
+          nbhits.push_back(newHit);
+        }
+        else
+        {
+          EpHit newHit;
+          newHit.nMip = bhit->get_edep();
+          newHit.phi = bhitPos.Phi();
+          sbhits.push_back(newHit);
+        }
+      }
+     }
+    
+    EpFinder_det[0]->Results(sbhits, 0, _EpInfo_det[0]);
+    EpFinder_det[1]->Results(nbhits, 0, _EpInfo_det[1]);
+
+    nbhits.clear();
+    sbhits.clear();
   
   }
   
