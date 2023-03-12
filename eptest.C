@@ -23,6 +23,8 @@
 #include <calobase/RawTowerGeom.h>
 #include <calobase/RawTowerGeomContainer.h>
 
+#include <trackbase_historic/SvtxTrackMap.h>
+
 #include <fun4all/Fun4AllReturnCodes.h>
 #include <fun4all/SubsysReco.h>  // for SubsysReco
 
@@ -149,12 +151,12 @@ int EpFinderReco::ResetEvent(PHCompositeNode * /*topNode*/)
 void EpFinderReco::GetEventPlanes(PHCompositeNode *topNode)
 {
 
- std::cout << "--------------------------------------------------------------------------------" << std::endl;
- std::cout << "Welcome to Event Plane Module " << std::endl;
- std::cout << "All you need is to choose a detector " << std::endl;
- std::cout << "From the list: EPD, CEMC, HCALOUT, HCALIN" << std::endl;
+ std::cout << "-------------------------------------------------------------------------------" << std::endl;
+ std::cout << "-----------------------Welcome to the Event Plane Module-----------------------" << std::endl;
+ std::cout << "-----Please choose from the list: EPD, CEMC, HCALOUT, HCALIN, BBC, TRACKING----" << std::endl;
  std::cout << "The output are the Q vectors and event plane angles up to the default 3rd order" << std::endl;
-
+ std::cout << "-------------------------------------------------------------------------------" << std::endl;
+ 
  if(detector == "EPD")
  {
  
@@ -267,7 +269,6 @@ void EpFinderReco::GetEventPlanes(PHCompositeNode *topNode)
    std::vector<EpHit> calohit;
    calohit.clear();
     
-   float tower_e = 0.; float tower_phi = 0.;
    unsigned int ntowers = _towerinfos->size();
    for (unsigned int ch = 0; ch < ntowers;  ch++)
    {
@@ -291,9 +292,55 @@ void EpFinderReco::GetEventPlanes(PHCompositeNode *topNode)
    }
 
    EpFinder_det[0]->Results(calohit, 0, _EpInfo_det[0]);
-   calohit.clear()
+   calohit.clear();
     
+  }
+  
+  else if (detector == "TRACKING")
+  {
+  
+    float px = 0.; float py = 0.; float pz = 0.;
+    TVector3 mom;
+    
+    std::vector<EpHit> trackhit;
+    trackhit.clear();
+    
+    SvtxTrackMap* trackmap = findNode::getClass<SvtxTrackMap>(topNode, "SvtxTrackMap");
+    if(!trackmap)
+    {
+       std::cout << "Could not locate SvtxTrackMap" << std::endl;
+       exit(1);
+    }
+  
+    for (SvtxTrackMap::Iter iter = trackmap->begin(); iter != trackmap->end(); ++iter)
+    {
+      SvtxTrack* track = iter->second;
+      px = track->get_px();
+      py = track->get_py();
+      pz = track->get_pz();
+      mom.SetX(px); mom.SetY(py); mom.SetZ(pz);
+      
+      if(mom.Pt() < 1.0)
+      {
+        EpHit newHit;
+        newHit.nMip = 1.;
+        newHit.phi = mom.Phi();
+        trackhit.push_back(newHit);
+      }
+    
+     }
+    
+     EpFinder_det[0]->Results(trackhit, 0, _EpInfo_det[0]);
+     trackhit.clear();
    }
+  
+  else if (detector == "BBC")
+  {
+  
+  
+  
+  
+  }
   
   return;
 }
